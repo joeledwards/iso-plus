@@ -1,0 +1,22 @@
+{
+  "fitbit": {
+    "appUUID": "50ba0a5c-7acf-4dab-8949-3990d7c01383",
+    "appType": "clockface",
+    "appDisplayName": "ISO-Plus",
+    "iconFile": "resources/icon.png",
+    "wipeColor": "",
+    "requestedPermissions": [
+      "access_heart_rate",
+      "access_location"
+    ],
+    "buildTargets": [
+      "higgs",
+      "meson"
+    ],
+    "i18n": {
+      "en": {
+        "name": "ISO-Plus"
+      }
+    }
+  }
+}
