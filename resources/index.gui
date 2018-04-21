@@ -1,7 +1,7 @@
 <svg class="background">
   <text id="dateLabel" />
   <text id="timeLabel" />
-  <text id="geoLabel" />
-  <text id="coordLabel" />
+  <text id="utcLabel" />
+  <text id="unixLabel" />
   <text id="hrLabel" />
 </svg>

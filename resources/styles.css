@@ -22,7 +22,7 @@
   fill: orange;
 }
 
-#geoLabel {
+#utcLabel {
   font-size: 24;
   font-family: System-Bold;
   text-length: 48;
@@ -32,7 +32,7 @@
   fill: grey;
 }
 
-#coordLabel {
+#unixLabel {
   font-size: 24;
   font-family: System-Bold;
   text-length: 48;
