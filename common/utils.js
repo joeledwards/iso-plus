@@ -13,12 +13,12 @@ export function monoDigits(num, pad = true) {
       }
     }
   } else {
-		let text = num.toString();
-		let textLen = text.length;
-		for (let i = 0; i < textLen; i++) {
-			monoNum += monoDigit(text.charAt(i));
-		}
-	}
+    let text = num.toString();
+    let textLen = text.length;
+    for (let i = 0; i < textLen; i++) {
+      monoNum += monoDigit(text.charAt(i));
+    }
+  }
 
   return monoNum;
 }
@@ -56,6 +56,6 @@ function monoDigit(digit) {
     case '7': return c7;
     case '8': return c8;
     case '9': return c9;
-		default: return digit;
+    default: return digit;
   }
 }
