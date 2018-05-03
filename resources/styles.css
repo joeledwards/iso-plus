@@ -32,14 +32,14 @@
   fill: grey;
 }
 
-#unixLabel {
+#powerLabel {
   font-size: 24;
   font-family: System-Bold;
   text-length: 48;
   text-anchor: middle;
   x: 50%;
   y: 65%;
-  fill: grey;
+  fill: white;
 }
 
 #hrLabel {

@@ -2,6 +2,6 @@
   <text id="dateLabel" />
   <text id="timeLabel" />
   <text id="utcLabel" />
-  <text id="unixLabel" />
+  <text id="powerLabel" />
   <text id="hrLabel" />
 </svg>
