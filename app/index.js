@@ -20,7 +20,7 @@ let cachedLocalDay;
 let lastLocalYear;
 let lastLocalMonth;
 let lastLocalDay;
-function localDate(date) {
+function getLocalDate(date) {
   let yearUpdated = false;
   let monthUpdated = false;
 
@@ -43,7 +43,7 @@ function localDate(date) {
     cachedLocalDay = `${cachedLocalMonth}-${monoDigits(day)}`;
   }
 
-  return cachedLocalDay;
+  return Promise.resolve(cachedLocalDay);
 }
 
 // Local Time
@@ -51,7 +51,7 @@ let cachedLocalHour;
 let cachedLocalMinute;
 let lastLocalHour;
 let lastLocalMinute;
-function localTime(date) {
+function getLocalTime(date) {
   let hourUpdated = false;
 
   let hour = date.getHours();
@@ -69,15 +69,8 @@ function localTime(date) {
     cachedLocalMinute = `${cachedLocalHour}:${monoDigits(minute)}`;
   }
 
-  return `${cachedLocalMinute}:${monoDigits(second)}`;
+  return Promise.resolve(`${cachedLocalMinute}:${monoDigits(second)}`);
 }
-
-// Get a handle on the <text> element
-let dateLabel = document.getElementById("dateLabel");
-let timeLabel = document.getElementById("timeLabel");
-let utcLabel = document.getElementById("utcLabel");
-let powerLabel = document.getElementById("powerLabel");
-let hrLabel = document.getElementById("hrLabel");
 
 // UTC Time
 let cachedUtcYear;
@@ -90,7 +83,7 @@ let lastUtcMonth;
 let lastUtcDay;
 let lastUtcHour;
 let lastUtcMinute;
-function utcTime(date) {
+function getUtcTime(date) {
   let yearUpdated = false;
   let monthUpdated = false;
   let dayUpdated = false;
@@ -132,23 +125,61 @@ function utcTime(date) {
     cachedUtcMinute = `${cachedUtcHour}:${monoDigits(minute)}`;
   }
 
-  return `${cachedUtcMinute}:${monoDigits(second)}Z`;
+  return Promise.resolve(`${cachedUtcMinute}:${monoDigits(second)}Z`);
+}
+
+function sleep(delay) {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+// Get a handle on the <text> elements
+let dateLabel = document.getElementById("dateLabel");
+let timeLabel = document.getElementById("timeLabel");
+let utcLabel = document.getElementById("utcLabel");
+let powerLabel = document.getElementById("powerLabel");
+let hrLabel = document.getElementById("hrLabel");
+
+function updateValues(ts) {
+  let now = (ts instanceof Date) ? ts : new Date();
+
+  return Promise.resolve({now})
+  .then(context => {
+    return getLocalDate(now)
+    .then(localDate => ({...context, localDate}));
+  })
+  .then(context => {
+    return getLocalTime(now)
+    .then(localTime => ({...context, localTime}));
+  })
+  .then(context => {
+    return getUtcTime(now)
+    .then(utcTime => ({...context, utcTime}));
+  })
+  .then(context => {
+    return getPower(now)
+    .then(power => ({...context, power}));
+  })
+  .then(context => {
+    return getHeartRate(now)
+    .then(heartRate => ({...context, heartRate}));
+  });
 }
 
 // Update the <text> element with the current time
 function updateClock(ts) {
-  //let start = Date.now();
-  let now = (ts instanceof Date) ? ts : new Date();
+  updateValues(ts)
+  .then(({now, localDate, localTime, utcTime, power, heartRate}) => {
+    dateLabel.text = localDate;
+    timeLabel.text = localTime;
+    utcLabel.text = utcTime;
+    powerLabel.text = power;
 
-  dateLabel.text = localDate(now);
-  timeLabel.text = localTime(now);
-  utcLabel.text = utcTime(now);
-  
-  // Update power info
-  powerLabel.text = getPower(now);
+    if (heartRate) {
+      hrLabel.text = heartRate;
+    }
 
-  // Update the heart rate
-  updateHeartRate();
+    //powerLabel.text = `⏱ ${Date.now() - now.getTime()} ms`;
+  });
 }
 
 // Update the clock every tick event
@@ -156,10 +187,12 @@ clock.ontick = ({date}) => updateClock(date);
 
 function getPower(start) {
   let powerInfo = `⚡️${monoDigits(battery.chargeLevel)}%`;
-  powerInfo += ` | ${(today.local.distance / 1000).toFixed(1)} km`;
+  powerInfo += ` | ${(today.local.distance / 1000).toFixed(1)}km`;
   powerInfo += ` | ${today.local.steps}`;
-  //powerInfo += ` | ⏱ ${monoDigits(((Date.now() - start) / 1000).toFixed(3))} s`;
-  return powerInfo;
+
+  //powerInfo = ` | ⏱ ${monoDigits(((Date.now() - start) / 1000).toFixed(3))} s`;
+
+  return Promise.resolve(powerInfo);
 }
 
 const emptyHr = `❤️ -- ❤️`;
@@ -167,13 +200,15 @@ let lastHrUpdate = 0;
 let lastHeartRate;
 let heartRate;
 
-function updateHeartRate() {
+function getHeartRate() {
   if (heartRate == null || Date.now() - lastHrUpdate > 5000) {
-    hrLabel.text = emptyHr;
-  } else if (lastHeartRate !== heartRate) {
-    lastHeartRate = heartRate;
-    hrLabel.text = `❤️ ${monoDigits(heartRate)} ❤️`;
+    return Promise.resolve(emptyHr);
   }
+  if (lastHeartRate !== heartRate) {
+    lastHeartRate = heartRate;
+    return Promise.resolve(`❤️ ${monoDigits(heartRate)} ❤️`);
+  }
+  return Promise.resolve();
 }
 
 // Store the Heart Rate reading; update on clock tick
