@@ -1,9 +1,9 @@
 import clock from "clock";
 import document from "document";
-import { Barometer } from "barometer";
 import { HeartRateSensor } from "heart-rate";
 import { geolocation } from "geolocation";
 import { battery, charger } from "power";
+import { today } from "user-activity";
 
 import {monoDigits} from "../common/utils";
 
@@ -12,7 +12,6 @@ clock.granularity = "seconds";
 
 // Heart Rate Sensor
 let hrm = new HeartRateSensor();
-let bmp = new Barometer();
 
 // Local Date
 let cachedLocalYear;
@@ -156,37 +155,11 @@ function updateClock(ts) {
 clock.ontick = ({date}) => updateClock(date);
 
 function getPower(start) {
-  let powerInfo = `⚡️ ${monoDigits(battery.chargeLevel)}%`;
-  powerInfo += getBar();
+  let powerInfo = `⚡️${monoDigits(battery.chargeLevel)}%`;
+  powerInfo += ` | ${(today.local.distance / 1000).toFixed(1)} km`;
+  powerInfo += ` | ${today.local.steps}`;
   //powerInfo += ` | ⏱ ${monoDigits(((Date.now() - start) / 1000).toFixed(3))} s`;
   return powerInfo;
-}
-
-const emptyBar = `  |  --`;
-let lastBarUpdate = 0;
-let lastBar;
-let bar;
-let barCache;
-
-function getBar() {
-  if (bar == null || Date.now() - lastBarUpdate > 5000) {
-    return emptyBar;
-  }
-  
-  if (!barCache || lastBar !== bar) {
-    lastBar = bar;
-    barCache = `  |   ${monoDigits((bar / 10).toFixed(1))} kPa`;
-  }
-  
-  return barCache;
-}
-
-bmp.onreading = reading => {
-  lastBarUpdate = Date.now();
-  bar = (bmp.pressure / 100) | 0;
-}
-bmp.onerror = () => {
-  bar = emptryBar;
 }
 
 const emptyHr = `❤️ -- ❤️`;
@@ -217,4 +190,3 @@ updateClock();
 
 // Read heart rate
 hrm.start();
-bmp.start();
